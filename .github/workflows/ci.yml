@@ -41,7 +41,7 @@ jobs:
         if: always()
         run: docker compose down
 
-deploy:
+  deploy:
     needs: docker-ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, Linux, X64, homelab]
