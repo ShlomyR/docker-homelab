@@ -1,0 +1,30 @@
+services:
+  web:
+    build:
+      context: .
+    image: home-lab-web:v1
+    container_name: homelab-web
+    ports:
+      - "8080:80"
+    volumes:
+      - homelab-data:/usr/share/nginx/html
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    container_name: homelab-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+volumes:
+  homelab-data:
+    external: true
+
+  redis-data:
