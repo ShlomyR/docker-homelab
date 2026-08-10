@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Build Docker image
+        run: docker build -t homelab-web:test .
+
+      - name: Start services
+        run: docker compose up -d
+
+      - name: Show containers
+        run: docker compose ps
+
+      - name: Test web service
+        run: |
+          sleep 10
+          curl --fail http://localhost:8080
+
+      - name: Test Redis
+        run: docker compose exec -T redis redis-cli ping
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down
