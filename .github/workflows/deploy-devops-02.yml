@@ -26,6 +26,13 @@ jobs:
           cp Dockerfile ansible/roles/monitoring/files/Dockerfile
           cp index.html ansible/roles/monitoring/files/index.html
 
+      - name: Debug Ansible files
+        run: |
+          pwd
+          find ansible -maxdepth 3 -type f | sort
+          echo "----- inventory -----"
+          cat ansible/inventories/test.ini
+
       - name: Validate Ansible syntax
         working-directory: ansible
         run: |
