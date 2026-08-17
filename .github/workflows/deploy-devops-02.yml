@@ -38,15 +38,6 @@ jobs:
           cp Dockerfile /home/devops/ansible-homelab/roles/monitoring/files/Dockerfile
           cp index.html /home/devops/ansible-homelab/roles/monitoring/files/index.html
 
-          cp monitoring/prometheus/prometheus.yml \
-            /home/devops/ansible-homelab/roles/monitoring/templates/prometheus.yml.j2
-
-          cp monitoring/loki/loki-config.yml \
-            /home/devops/ansible-homelab/roles/monitoring/templates/loki-config.yml.j2
-
-          cp monitoring/alloy/config.alloy \
-            /home/devops/ansible-homelab/roles/monitoring/templates/config.alloy.j2
-
       - name: Validate Ansible playbook
         working-directory: /home/devops/ansible-homelab
         run: |
