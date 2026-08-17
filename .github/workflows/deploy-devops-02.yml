@@ -1,0 +1,78 @@
+name: Deploy to devops-02
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: devops-02-deployment
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: [self-hosted, linux, x64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Verify Ansible connectivity
+        working-directory: /home/devops/ansible-homelab
+        run: ansible test -i inventory.ini -m ping
+
+  deploy:
+    needs: validate
+    runs-on: [self-hosted, linux, x64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Update Ansible deployment files
+        run: |
+          cp compose.yaml /home/devops/ansible-homelab/roles/monitoring/files/compose.yaml
+          cp Dockerfile /home/devops/ansible-homelab/roles/monitoring/files/Dockerfile
+          cp index.html /home/devops/ansible-homelab/roles/monitoring/files/index.html
+
+          cp monitoring/prometheus/prometheus.yml \
+            /home/devops/ansible-homelab/roles/monitoring/templates/prometheus.yml.j2
+
+          cp monitoring/loki/loki-config.yml \
+            /home/devops/ansible-homelab/roles/monitoring/templates/loki-config.yml.j2
+
+          cp monitoring/alloy/config.alloy \
+            /home/devops/ansible-homelab/roles/monitoring/templates/config.alloy.j2
+
+      - name: Validate Ansible playbook
+        working-directory: /home/devops/ansible-homelab
+        run: |
+          ansible-playbook \
+            -i inventory.ini \
+            deploy-test-stack.yml \
+            --syntax-check
+
+      - name: Deploy with Ansible
+        working-directory: /home/devops/ansible-homelab
+        run: |
+          ansible-playbook \
+            -i inventory.ini \
+            deploy-test-stack.yml
+
+      - name: Verify web application
+        run: |
+          curl --fail --retry 10 --retry-delay 3 \
+            http://10.0.0.129:8080/
+
+      - name: Verify Prometheus
+        run: |
+          curl --fail --retry 10 --retry-delay 3 \
+            http://10.0.0.129:9090/-/healthy
+
+      - name: Verify Loki
+        run: |
+          curl --fail --retry 10 --retry-delay 3 \
+            http://10.0.0.129:3100/ready
