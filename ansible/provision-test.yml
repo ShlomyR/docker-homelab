@@ -1,0 +1,8 @@
+---
+- name: Provision fresh test server
+  hosts: test
+  become: true
+
+  roles:
+    - common
+    - docker

@@ -1,0 +1,7 @@
+---
+- name: Deploy complete homelab stack to devops-02
+  hosts: test
+  become: false
+
+  roles:
+    - monitoring

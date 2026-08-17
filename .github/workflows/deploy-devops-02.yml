@@ -20,8 +20,22 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose config
 
+      - name: Prepare Ansible deployment files
+        run: |
+          cp compose.yaml ansible/roles/monitoring/files/compose.yaml
+          cp Dockerfile ansible/roles/monitoring/files/Dockerfile
+          cp index.html ansible/roles/monitoring/files/index.html
+
+      - name: Validate Ansible syntax
+        working-directory: ansible
+        run: |
+          ansible-playbook \
+            -i inventory.ini \
+            deploy-test-stack.yml \
+            --syntax-check
+
       - name: Verify Ansible connectivity
-        working-directory: /home/devops/ansible-homelab
+        working-directory: ansible
         run: ansible test -i inventory.ini -m ping
 
   deploy:
@@ -32,22 +46,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Update Ansible deployment files
+      - name: Prepare Ansible deployment files
         run: |
-          cp compose.yaml /home/devops/ansible-homelab/roles/monitoring/files/compose.yaml
-          cp Dockerfile /home/devops/ansible-homelab/roles/monitoring/files/Dockerfile
-          cp index.html /home/devops/ansible-homelab/roles/monitoring/files/index.html
-
-      - name: Validate Ansible playbook
-        working-directory: /home/devops/ansible-homelab
-        run: |
-          ansible-playbook \
-            -i inventory.ini \
-            deploy-test-stack.yml \
-            --syntax-check
+          cp compose.yaml ansible/roles/monitoring/files/compose.yaml
+          cp Dockerfile ansible/roles/monitoring/files/Dockerfile
+          cp index.html ansible/roles/monitoring/files/index.html
 
       - name: Deploy with Ansible
-        working-directory: /home/devops/ansible-homelab
+        working-directory: ansible
         run: |
           ansible-playbook \
             -i inventory.ini \

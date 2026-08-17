@@ -1,0 +1,15 @@
+---
+- name: Restart Prometheus
+  ansible.builtin.command:
+    cmd: docker compose restart prometheus
+    chdir: "{{ homelab_dir }}"
+
+- name: Restart Loki
+  ansible.builtin.command:
+    cmd: docker compose restart loki
+    chdir: "{{ homelab_dir }}"
+
+- name: Restart Alloy
+  ansible.builtin.command:
+    cmd: docker compose restart alloy
+    chdir: "{{ homelab_dir }}"
