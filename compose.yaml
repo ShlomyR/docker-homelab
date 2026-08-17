@@ -23,8 +23,63 @@ services:
     volumes:
       - redis-data:/data
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: homelab-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: homelab-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    container_name: homelab-loki
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: homelab-alloy
+    command:
+      - run
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy-data:/var/lib/alloy
+    restart: unless-stopped
+    depends_on:
+      - loki
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: homelab-node-exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
 volumes:
   homelab-data:
     external: true
 
   redis-data:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+  alloy-data:
