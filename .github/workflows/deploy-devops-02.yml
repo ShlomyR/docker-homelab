@@ -43,7 +43,7 @@ jobs:
 
       - name: Verify Ansible connectivity
         working-directory: ansible
-        run: ansible test -i -i inventories/test.ini -m ping
+        run: ansible test -i inventories/test.ini -m ping
 
   deploy:
     needs: validate
