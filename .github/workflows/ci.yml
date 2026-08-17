@@ -40,29 +40,4 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose down
-
-  deploy:
-    needs: docker-ci
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, Linux, X64, homelab]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy application
-        run: |
-          cd /home/devops/docker-web
-          git fetch origin
-          git reset --hard origin/main
-          docker compose up -d --build
-
-      - name: Wait for services
-        run: sleep 15
-
-      - name: Verify deployment
-        run: |
-          cd /home/devops/docker-web
-          docker compose ps
-          curl --fail http://localhost:8080
-          docker compose exec -T redis redis-cli ping
+  
